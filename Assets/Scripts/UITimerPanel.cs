@@ -68,7 +68,7 @@ public class UITimerPanel : MonoBehaviour {
         if (focus) {
             DateTime afterPause = DateTime.Now;
             TimeSpan span = afterPause - _pausedTime;
-            DecreaseTimer(span.Seconds);
+            DecreaseTimer((int)span.TotalSeconds);
             Loader.TasksManager.SaveTime(_time);
             if (_time > 0) {
                 OpenAndStartTimer();
