@@ -11,12 +11,21 @@ public class Loader : MonoBehaviour {
 
     [SerializeField]
     private bool _isOnLoading;
-    
+
+    private static Loader _instance;
+
     public static ColorsConfig ColorsConfig;
     public static TasksManager TasksManager;
     public static UITasksPanel UITasksPanel;
 
     private void Awake() {
+        if (_instance == null) {
+            _instance = this;
+        } else {
+            Destroy(gameObject);
+            return;
+        }
+
         _isOnLoading = SceneManager.GetActiveScene().name == "LoadingScene";
         StartCoroutine(LoadingCoroutine());
     }
@@ -25,16 +34,21 @@ public class Loader : MonoBehaviour {
         ColorsConfig = _colorsConfig;
         SetLoadingPanel(true);
         TasksManager = FindObjectOfType<TasksManager>();
-
         yield return TasksManager.Loading();
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("MainScene", LoadSceneMode.Additive);
-        while (!asyncLoad.isDone) {
-            yield return null;
+
+        if (_isOnLoading) {
+            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("MainScene", LoadSceneMode.Additive);
+            while (!asyncLoad.isDone) {
+                yield return null;
+            }
         }
 
         UITasksPanel = FindObjectOfType<UITasksPanel>();
         yield return UITasksPanel.Loading();
-        SceneManager.UnloadSceneAsync("LoadingScene");
+        if (_isOnLoading) {
+            SceneManager.UnloadSceneAsync("LoadingScene");
+        }
+
         SetLoadingPanel(false);
     }
 
