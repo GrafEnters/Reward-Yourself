@@ -14,6 +14,10 @@ public class UITimerPanel : MonoBehaviour {
     [SerializeField]
     private Transform _timerArrow;
 
+    [SerializeField]
+    private Ringtone _ringtone;
+    
+    
     public void OpenAndStartTimer() {
         _time = Loader.TasksManager.Profile.TimeAmount;
         _maxTime = _time;
@@ -42,16 +46,17 @@ public class UITimerPanel : MonoBehaviour {
 
     private void UpdateTimeText(int time) {
         _timeText.text = TimeUtils.GetStrFromSeconds(time);
-        float angle = Mathf.Lerp(360, 45, (time + 0f) / _maxTime);
+        float angle =  Mathf.Lerp(360, 45, _maxTime == 0 ? 1 :(time + 0f) / _maxTime);
         _timerArrow.transform.rotation = Quaternion.Euler(0, 0, angle);
     }
 
     private void StartAlarm() {
-        Debug.Log("Alarm is not implemented");
+        _ringtone.Play();
     }
 
     public void StopTimerAndClose() {
         TryStopTimer();
+        _ringtone.Stop();
         gameObject.SetActive(false);
         Loader.UITasksPanel.UpdateTimeText();
     }
