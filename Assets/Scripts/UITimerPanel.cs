@@ -69,6 +69,8 @@ public class UITimerPanel : MonoBehaviour {
         Loader.TasksManager.SaveTime(_time);
     }
 
+#if UNITY_EDITOR
+
     private void OnApplicationFocus(bool focus) {
         if (focus) {
             DateTime afterPause = DateTime.Now;
@@ -86,4 +88,6 @@ public class UITimerPanel : MonoBehaviour {
             _pausedTime = DateTime.Now;
         }
     }
+
+#endif
 }
