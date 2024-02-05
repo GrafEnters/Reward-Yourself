@@ -11,13 +11,19 @@ public class UITimerPanel : MonoBehaviour {
     private int _maxTime;
     private Coroutine _timerCoroutine;
     private DateTime _pausedTime;
+
     [SerializeField]
     private Transform _timerArrow;
 
     [SerializeField]
     private Ringtone _ringtone;
+
+    [SerializeField]
+    private float _timerToReset = 5;
     
-    
+    [SerializeField]
+    private Transform _resetButton;
+
     public void OpenAndStartTimer() {
         _time = Loader.TasksManager.Profile.TimeAmount;
         _maxTime = _time;
@@ -46,7 +52,7 @@ public class UITimerPanel : MonoBehaviour {
 
     private void UpdateTimeText(int time) {
         _timeText.text = TimeUtils.GetStrFromSeconds(time);
-        float angle =  Mathf.Lerp(360, 45, _maxTime == 0 ? 1 :(time + 0f) / _maxTime);
+        float angle = Mathf.Lerp(360, 45, _maxTime == 0 ? 1 : (time + 0f) / _maxTime);
         _timerArrow.transform.rotation = Quaternion.Euler(0, 0, angle);
     }
 
@@ -90,4 +96,40 @@ public class UITimerPanel : MonoBehaviour {
     }
 
 #endif
+
+    private Coroutine _resetTimerCoroutine;
+
+    public void StartHoldingReset() {
+        _resetTimerCoroutine = StartCoroutine(ResetTimer());
+    }
+
+    public void EndHoldingReset() {
+        if (_resetTimerCoroutine == null) {
+            return;
+        }
+        _resetButton.transform.localScale = Vector3.one;
+        StopCoroutine(_resetTimerCoroutine);
+        _resetTimerCoroutine = null;
+    }
+
+    private IEnumerator ResetTimer() {
+        float timer = _timerToReset;
+
+        Vector3 finVector = Vector3.one * 20;
+        while (timer > 0) {
+            float curPercent = 1 - timer / _timerToReset;
+            _resetButton.localScale = Vector3.Slerp(Vector3.one, finVector, curPercent);
+            yield return new WaitForEndOfFrame();
+            timer -= Time.deltaTime;
+        }
+
+        ResetTime();
+    }
+
+    private void ResetTime() {
+        _time = 0;
+        _resetButton.transform.localScale = Vector3.one;
+        Loader.TasksManager.SaveTime(_time);
+        StopTimerAndClose();
+    }
 }
