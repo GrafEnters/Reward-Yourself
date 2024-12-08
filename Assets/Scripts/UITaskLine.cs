@@ -9,6 +9,9 @@ public class UITaskLine : MonoBehaviour {
     [SerializeField]
     private TextMeshProUGUI _rewardText;
 
+    [SerializeField]
+    private RectTransform _rectTransform;
+    
     private Task _task;
 
     private Action<Task> _onComplete;
@@ -19,8 +22,19 @@ public class UITaskLine : MonoBehaviour {
         _onComplete = complete;
         _onEdit = edit;
         _onDelete = delete;
+        GestureRecognition.Instance.OnRecognised += TryCompleteByGesture;
     }
 
+
+    private void TryCompleteByGesture(Gesture gesture, Vector2 vector2) {
+        if (gesture != Gesture.Star) {
+            return;
+        }
+        
+        if (RectTransformUtility.RectangleContainsScreenPoint(_rectTransform, Camera.main.WorldToScreenPoint(vector2), Camera.main)) {
+            Complete();
+        }
+    }
     public void SetData(Task task) {
         _task = task;
         _descriptionText.text = _task.Description;
